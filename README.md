@@ -119,15 +119,50 @@ If you use AlphaNet in your research, please cite:
 }
 ```
 
-## 📄 License
+## � References & Citations
+
+This work builds upon and is inspired by the following research:
+
+### Core Technologies
+
+**BitNet (1-bit Neural Networks)**
+- Wang, H., et al. (2023). "BitNet: Scaling 1-bit Transformers for Large Language Models." Microsoft Research.
+- [Paper](https://arxiv.org/abs/2310.11453)
+
+**Spiking Neural Networks**
+- Maass, W. (1997). "Networks of spiking neurons: The third generation of neural network models." Neural Networks.
+- Tavanaei, A., et al. (2019). "Deep learning in spiking neural networks." Neural Networks.
+
+**Quantum Machine Learning**
+- Schuld, M., & Petruccione, F. (2018). "Supervised Learning with Quantum Computers." Springer.
+- Biamonte, J., et al. (2017). "Quantum machine learning." Nature.
+
+### Dataset
+
+**UCF101**
+- Soomro, K., Zamir, A. R., & Shah, M. (2012). "UCF101: A Dataset of 101 Human Actions Classes From Videos in The Wild." CRCV-TR-12-01.
+- [Dataset](https://www.crcv.ucf.edu/data/UCF101.php)
+
+### Infrastructure
+
+**Google Cloud TPU**
+- This research was conducted using Google Cloud TPU v6e resources.
+- Framework: JAX/Flax by Google Research
+- [JAX Documentation](https://github.com/google/jax)
+
+## �📄 License
 
 MIT License
 
 ## 🙏 Acknowledgments
 
-- UCF101 dataset: [Soomro et al., 2012]
-- JAX/Flax framework
-- Google Cloud TPU Research Credits
+- **UCF101 Dataset**: Khurram Soomro, Amir Roshan Zamir, and Mubarak Shah (University of Central Florida)
+- **BitNet**: Microsoft Research for 1-bit quantization techniques
+- **Spiking Neural Networks**: Wolfgang Maass and the neuromorphic computing community
+- **Quantum ML**: Maria Schuld, Francesco Petruccione, and quantum computing researchers
+- **JAX/Flax Framework**: Google Research
+- **Infrastructure**: Google Cloud TPU Research Credits Program
+- **Community**: Open-source contributors to JAX, Flax, and Optax
 
 ## 📧 Contact
 

@@ -6,9 +6,9 @@ A novel neural network architecture combining **Quantum Computing**, **Binary Ne
 
 AlphaNet integrates three cutting-edge paradigms:
 
-1. **Quantum Layer**: Parameterized quantum circuits for feature transformation
-2. **BitNet Layer**: 1-bit quantized dense layers for memory efficiency
-3. **Spiking LIF Neurons**: Leaky Integrate-and-Fire neurons for temporal processing
+1. **Quantum Layer**: Parameterized quantum circuits for feature transformation.
+2. **BitNet Layer**: 1-bit quantized dense layers for memory efficiency.
+3. **Spiking LIF Neurons**: Leaky Integrate-and-Fire neurons for temporal processing.
 
 ```
 Input Video (T×H×W×C) 
@@ -31,80 +31,96 @@ Output (Action classes)
 
 ### Key Findings
 
-- ✅ **57% Top-1 accuracy** on full UCF101 (101 classes) demonstrates the architecture's viability
-- ✅ **98% Top-5 accuracy** shows the model understands action semantics
-- ✅ **Efficient**: 12.5M parameters vs 100M+ for standard 3D CNNs
-- ✅ **Scalable**: Performance improves with increased capacity per class
+- ✅ **57% Top-1 accuracy** on full UCF101 (101 classes) demonstrates the architecture's viability.
+- ✅ **98% Top-5 accuracy** shows the model understands action semantics.
+- ✅ **Efficient**: 12.5M parameters vs 100M+ for standard 3D CNNs.
+- ✅ **Scalable**: Performance improves with increased capacity per class.
 
 ## 🚀 Quick Start
 
 ### Installation
 
-```bash
-pip install jax[tpu] flax optax
-pip install opencv-python numpy
-```
+Ensure you have Python 3.8+ installed.
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/frankyemm/alphanet.git
+   cd alphanet
+   ```
+
+2. Install dependencies:
+   ```bash
+   pip install jax[tpu] flax optax
+   pip install opencv-python numpy datasets
+   ```
+   *Note: Adjust the JAX installation command based on your hardware (CPU/GPU/TPU). See [JAX installation guide](https://github.com/google/jax#installation).*
 
 ### Training
 
-```bash
-# Download UCF101 dataset
-wget https://www.crcv.ucf.edu/data/UCF101/UCF101.rar
-unrar x UCF101.rar
+To train the model on the UCF101 dataset:
 
-# Train on TPU
-export PJRT_DEVICE=TPU
-python run_video_tpu.py
-```
+1. **Download UCF101 dataset**:
+   ```bash
+   wget https://www.crcv.ucf.edu/data/UCF101/UCF101.rar
+   unrar x UCF101.rar
+   ```
+
+2. **Run training**:
+   ```bash
+   # Train on TPU (or GPU/CPU depending on JAX installation)
+   python run_video_tpu.py
+   ```
+   This script initializes the model, loads the data, and starts the training loop. It saves the trained model to `trained_model.pkl`.
 
 ### Evaluation
+
+To evaluate a trained model:
 
 ```bash
 python evaluate_model.py
 ```
+This script loads `trained_model.pkl` and computes metrics like Top-1/Top-5 accuracy, precision, recall, and F1-score on the test set.
 
 ## 📁 Project Structure
 
 ```
 alphanet/
 ├── alphanet/
-│   ├── __init__.py
-│   ├── model.py          # QBitSNN architecture
-│   ├── layers.py         # Quantum, BitNet, Spiking layers
-│   ├── train.py          # Training utilities
-│   └── data.py           # UCF101 data loader
-├── run_video_tpu.py      # Training script
-├── evaluate_model.py     # Evaluation script
-└── README.md
+│   ├── __init__.py       # Package initialization
+│   ├── model.py          # QBitSNN architecture definition
+│   ├── layers.py         # Custom layers (Quantum, BitNet, Spiking)
+│   ├── train.py          # Training state and step functions
+│   └── data.py           # Data loaders (UCF101, Synthetic, etc.)
+├── run_video_tpu.py      # Main training script
+├── evaluate_model.py     # Evaluation and metrics script
+└── README.md             # Project documentation
 ```
 
 ## 🔬 Architecture Details
 
-### Quantum Layer
-- Parameterized rotation gates (RY, RZ)
-- Quantum state measurement
-- Learnable parameters: θ ∈ ℝ^d
+### Quantum Layer (`alphanet.layers.QuantumLayer`)
+- **Mechanism**: Parameterized rotation gates (RY, RZ) acting on input features.
+- **Function**: Encodes classical data into quantum-inspired representations.
+- **Parameters**: Learnable parameters $\theta \in \mathbb{R}^d$.
 
-### BitNet Layer
-- 1-bit quantized weights: W ∈ {-1, +1}
-- Sign activation function
-- Memory efficient: 32× reduction
+### BitNet Layer (`alphanet.layers.BitDense`)
+- **Mechanism**: Dense layer with 1-bit quantized weights $W \in \{-1, 0, +1\}$.
+- **Function**: Performs matrix multiplication with extreme memory efficiency (up to 32x reduction).
+- **Training**: Uses Straight-Through Estimator (STE) for gradient calculation.
 
-### Spiking LIF Layer
-- Leaky Integrate-and-Fire neurons
-- Temporal dynamics: V(t+1) = βV(t) + I(t)
-- Spike threshold: V > θ
+### Spiking LIF Layer (`alphanet.layers.SpikingLIF`)
+- **Mechanism**: Leaky Integrate-and-Fire neurons with surrogate gradients.
+- **Function**: Captures temporal dynamics: $V(t+1) = \beta V(t) + I(t)$.
+- **Spike Generation**: Emits a spike (1.0) when $V > \theta$.
 
 ## 📈 Training Configuration
 
-```python
-# Optimal configuration (101 classes)
-num_classes = 101
-frame_size = 64
-hidden_dim = 1024
-learning_rate = 0.0005 (exponential decay)
-epochs = 300
-```
+Default configuration in `run_video_tpu.py`:
+- **Classes**: 40 (Subset) / 101 (Full)
+- **Frame Size**: 64x64
+- **Hidden Dimension**: 12000 (Scales with class count)
+- **Learning Rate**: 0.0005 with exponential decay
+- **Epochs**: 300
 
 ## 🎓 Citation
 
@@ -119,7 +135,7 @@ If you use AlphaNet in your research, please cite:
 }
 ```
 
-## � References & Citations
+## 📚 References & Citations
 
 This work builds upon and is inspired by the following research:
 
@@ -150,7 +166,7 @@ This work builds upon and is inspired by the following research:
 - Framework: JAX/Flax by Google Research
 - [JAX Documentation](https://github.com/google/jax)
 
-## �📄 License
+## 📄 License
 
 MIT License
 

@@ -1,3 +1,9 @@
+"""Training script for AlphaNet on UCF101 dataset (TPU/GPU).
+
+This script initializes the AlphaNet model, loads the UCF101 dataset, and runs
+the training loop on TPU or GPU. It saves the trained model to a pickle file.
+"""
+
 import jax
 import jax.numpy as jnp
 import optax

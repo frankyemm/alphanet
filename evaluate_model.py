@@ -1,3 +1,10 @@
+"""Evaluation script for AlphaNet on UCF101 dataset.
+
+This script loads a trained AlphaNet model and evaluates its performance on the
+UCF101 test set. It computes various metrics including Top-1/Top-5 accuracy,
+Precision, Recall, F1-Score, and generates a confusion matrix.
+"""
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -7,11 +14,21 @@ from alphanet.data import UCF101VideoLoader
 import pickle
 
 def evaluate_model(state, test_loader, num_batches=50):
-    """
-    Evaluate model on test set with comprehensive metrics.
-    
+    """Evaluates the model on the test set.
+
+    Runs the model on batches of test data and aggregates predictions.
+
+    Args:
+        state (TrainState): The trained model state.
+        test_loader (UCF101VideoLoader): Data loader for the test set.
+        num_batches (int): Number of batches to evaluate. Defaults to 50.
+
     Returns:
-        metrics: Dictionary with accuracy, precision, recall, F1, confusion matrix
+        tuple: A tuple containing:
+            - metrics (dict): Dictionary of computed metrics (accuracy, etc.).
+            - all_predictions (numpy.ndarray): Array of all predicted class indices.
+            - all_labels (numpy.ndarray): Array of all true class indices.
+            - all_logits (numpy.ndarray): Array of all output logits.
     """
     all_predictions = []
     all_labels = []
@@ -48,7 +65,27 @@ def evaluate_model(state, test_loader, num_batches=50):
 
 
 def compute_metrics(predictions, labels, logits, num_classes):
-    """Compute comprehensive evaluation metrics."""
+    """Computes comprehensive evaluation metrics.
+
+    Args:
+        predictions (numpy.ndarray): Array of predicted class indices.
+        labels (numpy.ndarray): Array of true class indices.
+        logits (numpy.ndarray): Array of raw output logits.
+        num_classes (int): Total number of classes.
+
+    Returns:
+        dict: A dictionary containing:
+            - top1_accuracy (float): Top-1 accuracy percentage.
+            - top5_accuracy (float): Top-5 accuracy percentage.
+            - mean_precision (float): Macro-averaged precision.
+            - mean_recall (float): Macro-averaged recall.
+            - mean_f1 (float): Macro-averaged F1-score.
+            - per_class_accuracy (list): Accuracy per class.
+            - per_class_precision (list): Precision per class.
+            - per_class_recall (list): Recall per class.
+            - per_class_f1 (list): F1-score per class.
+            - confusion_matrix (numpy.ndarray): Confusion matrix (True x Pred).
+    """
     
     # 1. Top-1 Accuracy (standard metric)
     top1_accuracy = np.mean(predictions == labels) * 100
@@ -111,7 +148,12 @@ def compute_metrics(predictions, labels, logits, num_classes):
 
 
 def print_evaluation_report(metrics, class_names):
-    """Print a detailed evaluation report."""
+    """Prints a detailed evaluation report to the console.
+
+    Args:
+        metrics (dict): Dictionary of metrics returned by `compute_metrics`.
+        class_names (list): List of class names corresponding to indices.
+    """
     
     print("\n" + "=" * 70)
     print("ALPHANET - UCF101 EVALUATION REPORT")
@@ -172,7 +214,15 @@ def print_evaluation_report(metrics, class_names):
 
 
 def save_results(metrics, predictions, labels, logits, filename="evaluation_results.pkl"):
-    """Save evaluation results for later analysis."""
+    """Saves evaluation results to a pickle file.
+
+    Args:
+        metrics (dict): computed metrics.
+        predictions (numpy.ndarray): predicted labels.
+        labels (numpy.ndarray): true labels.
+        logits (numpy.ndarray): raw logits.
+        filename (str): Output filename. Defaults to "evaluation_results.pkl".
+    """
     results = {
         'metrics': metrics,
         'predictions': predictions,

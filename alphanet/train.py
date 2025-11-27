@@ -5,10 +5,31 @@ import optax
 from .model import QBitSNN
 
 class TrainState(train_state.TrainState):
-    # Add a field to store the gradient mask
+    """Custom TrainState that includes a gradient mask for freezing layers.
+
+    Attributes:
+        grad_mask (any): A pytree matching the structure of `params`, containing
+            masks (0 or 1) to be applied to gradients.
+    """
     grad_mask: any = None
 
 def create_train_state(rng, model, input_shape, learning_rate=0.0005, total_steps=10000):
+    """Creates and initializes the training state.
+
+    This function initializes the model parameters, sets up the optimizer with
+    an exponential decay schedule, and initializes the gradient mask (all ones).
+
+    Args:
+        rng (jax.random.PRNGKey): Random number generator key.
+        model (flax.linen.Module): The model instance.
+        input_shape (tuple): Shape of the input tensor (excluding batch dimension).
+        learning_rate (float): Initial learning rate. Defaults to 0.0005.
+        total_steps (int): Total number of training steps (used for documentation,
+            though the schedule defined here is step-based). Defaults to 10000.
+
+    Returns:
+        TrainState: The initialized training state.
+    """
     params = model.init(rng, jnp.ones(input_shape))['params']
     
     # Exponential decay schedule (proven to work well)
@@ -30,7 +51,16 @@ def create_train_state(rng, model, input_shape, learning_rate=0.0005, total_step
     return TrainState.create(apply_fn=model.apply, params=params, tx=tx, grad_mask=grad_mask)
 
 def freeze_layers(state, layer_names=['QuantumCore', 'BitNetCore']):
-    """Creates a mask to zero out gradients for specified layers."""
+    """Creates a mask to zero out gradients for specified layers.
+
+    Args:
+        state (TrainState): The current training state.
+        layer_names (list): List of layer names (substrings) to freeze.
+            Defaults to ['QuantumCore', 'BitNetCore'].
+
+    Returns:
+        TrainState: A new TrainState with the updated `grad_mask`.
+    """
     def map_fn(path, param):
         # path is a tuple of keys, e.g., ('params', 'QuantumCore', 'theta')
         for name in layer_names:
@@ -44,6 +74,22 @@ def freeze_layers(state, layer_names=['QuantumCore', 'BitNetCore']):
 
 @jax.jit
 def train_step(state, batch_x, batch_y):
+    """Performs a single training step.
+
+    Computes loss and gradients, applies the gradient mask (if any), and updates
+    the model parameters.
+
+    Args:
+        state (TrainState): The current training state.
+        batch_x (jax.numpy.ndarray): Input batch.
+        batch_y (jax.numpy.ndarray): Target batch.
+
+    Returns:
+        tuple: A tuple containing:
+            - state (TrainState): The updated training state.
+            - loss (jax.numpy.ndarray): The loss value for the step.
+            - logits (jax.numpy.ndarray): The model predictions.
+    """
     def loss_fn(params):
         logits, spikes = state.apply_fn({'params': params}, batch_x)
         
@@ -74,6 +120,18 @@ def train_step(state, batch_x, batch_y):
     return state, loss, logits
 
 def train_epoch(state, train_loader, num_batches=10):
+    """Runs training for a single epoch (multiple batches).
+
+    Args:
+        state (TrainState): The current training state.
+        train_loader (object): Data loader object with a `get_batch()` method.
+        num_batches (int): Number of batches to process in this epoch. Defaults to 10.
+
+    Returns:
+        tuple: A tuple containing:
+            - state (TrainState): The updated training state.
+            - mean_loss (jax.numpy.ndarray): The average loss over the epoch.
+    """
     epoch_loss = []
     for _ in range(num_batches):
         batch_x, batch_y = train_loader.get_batch()

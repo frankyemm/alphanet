@@ -4,12 +4,36 @@ from flax import linen as nn
 from .layers import QuantumLayer, BitDense, SpikingLIF
 
 class QBitSNN(nn.Module):
+    """Quantum-BitNet-Spiking Neural Network (QBitSNN) architecture.
+
+    This model integrates three paradigms:
+    1. Quantum Layer: Encodes input features using parameterized quantum circuits.
+    2. BitNet Layer: Processes encoded features with 1-bit quantized weights.
+    3. Spiking Neural Network (SNN): Integrates temporal information using Leaky Integrate-and-Fire neurons.
+
+    Attributes:
+        hidden_dim (int): Dimension of the hidden layer (number of neurons).
+        output_dim (int): Dimension of the output layer (number of classes).
+        time_steps (int): Number of time steps to simulate in the SNN loop. Defaults to 10.
+    """
     hidden_dim: int
     output_dim: int
     time_steps: int = 10
     
     @nn.compact
     def __call__(self, x):
+        """Forward pass of the QBitSNN.
+
+        Args:
+            x (jax.numpy.ndarray): Input tensor of shape (Batch, Time, InputFeatures) or (Batch, InputFeatures).
+                If the input is 2D (Batch, InputFeatures), it is treated as static input for each time step
+                unless sliced inside the loop.
+
+        Returns:
+            tuple: A tuple containing:
+                - logits (jax.numpy.ndarray): Output logits of shape (Batch, OutputDim).
+                - spikes (jax.numpy.ndarray): Spike history of shape (Batch, Time, HiddenDim).
+        """
         # x shape: (Batch, Time, InputFeatures)
         batch_size = x.shape[0]
         

@@ -129,7 +129,7 @@ If you use AlphaNet in your research, please cite:
 ```bibtex
 @software{alphanet2024,
   title={AlphaNet: Quantum-BitNet-SNN for Video Action Recognition},
-  author={Your Name},
+  author={Franky Cardona},
   year={2024},
   url={https://github.com/frankyemm/alphanet}
 }
